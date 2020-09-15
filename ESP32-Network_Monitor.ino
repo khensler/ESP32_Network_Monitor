@@ -8,8 +8,8 @@
 #include <WebResponseImpl.h>
 
 /*
-    WifiSettings from:
-    https://github.com/Juerd/ESP-WiFiSettings
+    ESP32Ping from:
+    https://github.com/marian-craciunescu/ESP32Ping
     Other Libriaries from the library manager
 */
 
@@ -27,12 +27,26 @@ const char* ntpServer = "pool.ntp.org";
 //const int   daylightOffset_sec = 3600;
 #define ONBOARD_LED  2
 
+time_t now;
+
 void notFound(AsyncWebServerRequest *request) {
   //Handle 404
   request->send(404, "text/plain", "Not found");
 }
 
-time_t now;
+String toStringAddZero(int data)
+{
+  String st = "";
+  if (data < 10)
+  {
+    st = "0" + String(data);
+  }
+  else
+  {
+    st = String(data);
+  }
+  return st;
+}
 
 void setup() {
     Serial.begin(115200);
@@ -67,19 +81,7 @@ void setup() {
   
 }
 
-String toStringAddZero(int data)
-{
-  String st = "";
-  if (data < 10)
-  {
-    st = "0" + String(data);
-  }
-  else
-  {
-    st = String(data);
-  }
-  return st;
-}
+
 
 void loop() {
   struct tm *timeinfo;
@@ -90,11 +92,9 @@ void loop() {
   int hour = timeinfo->tm_hour;
   int mins = timeinfo->tm_min;
   int sec = timeinfo->tm_sec;
-
-  
+ 
   File file = SPIFFS.open("/responses.csv", FILE_APPEND);
-  // Your loop code here
-  //IPAddress ip (192, 168, 0, 1); // The remote ip to ping
+
   bool ret = Ping.ping(WiFi.gatewayIP());
   float avg_time_ms = Ping.averageTime();
   Serial.println("----------Local Gateway----------");
